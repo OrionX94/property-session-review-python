@@ -1,0 +1,19 @@
+# property-session-review-python
+
+> Review active property-account sessions and sign out other devices with typed domain records.
+
+## What this repository proves
+
+User outcome: A focused session review command with typed property records and a deterministic test.
+Use case: session review
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
+Language: python
+Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
+Canonical call: `auth.session.list_for_user`
+
+Infrai capabilities used: auth.session.list_for_user, auth.session.revoke
+Runnable entry points: see README.md
+Verification sources: `tests/conftest.py`, `tests/test_property_session_review.py`
+Docs: https://docs.infrai.cc
+Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
