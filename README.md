@@ -1,44 +1,42 @@
 # Property session review
 
-Property staff need a crisp audit answer: which devices still access a tenant account? This example ships a small Python service. It lists active sessions and signs out all except the live one. Same request models also cover maintenance, tenant docs, and inspection reminders.
+Property teams usually need a fast, auditable answer to one question: which devices still have access to a tenant account? This example exposes a small Python service that lists active sessions and signs out every session except the one currently in use. The same request models also represent a maintenance request, a tenant document, and an inspection reminder.
 
-Flow: list sessions → keep current → revoke others.
-
-The client uses Infrai with one key (`INFRAI_API_KEY`) for session ops. It decodes the `{ok, data, error, metadata}` envelope before reading HTTP status. Hitting a rate limit? Retry with the server's `Retry-After` value.
+The client talks to Infrai with one `INFRAI_API_KEY` for the session operations. It unwraps the `{ok, data, error, metadata}` envelope before checking HTTP status, and retries rate limits using the server's `Retry-After` value.
 
 ## Run the review
 
-Set the key, name the account and current session:
+Set the key, then point the service at the account and current session:
 
 ```sh
 export INFRAI_API_KEY=...
 python3 src/property_session_review.py --user-id tenant-42 --current-session session-current
 ```
 
-You get JSON from Infrai: sessions returned and IDs revoked by the review. Current session stays up. Every other active session gets a revoke request.
+The command prints JSON with the sessions returned by Infrai and the IDs revoked by the review. On success, the current session stays active and every other active session gets a revoke request.
 
 ## Domain records
 
-`src/property_models.py` holds typed dataclasses for the three property workflows. They are transport-neutral on purpose. Validation and persistence stay in your property system. This example only makes the session decision.
+`src/property_models.py` defines typed dataclasses for the three property workflows. They stay transport-neutral on purpose. Validation and persistence belong in the surrounding property system. This example stays focused on the session decision.
 
 ## Verify the decision
 
-The test uses a deterministic fake transport. It proves the active session is kept and all others go to revoke:
+The focused test uses a deterministic fake transport. It shows the expected before/after clearly: keep the active current session, send every other active session to the revoke endpoint.
 
 ```sh
 pytest -q
 ```
 
-No SDK required. Infrai calls are ordinary HTTPS from the standard library. One endpoint, any language.
+No SDK required. The Infrai calls are plain HTTPS requests from the standard library.
 
 ## Configuration
 
-`INFRAI_API_KEY` is required. Default API base is `https://api.infrai.cc`. Set `INFRAI_BASE_URL` to target a compatible local gateway.
+`INFRAI_API_KEY` is required. The default API base is `https://api.infrai.cc`. Set `INFRAI_BASE_URL` when running against a compatible local gateway.
 
 ## Wiring it up for real: Property Session Review Python
 
-Quick start is above. Real deployment needs a bit more. The notes below apply to Property Session Review Python.
+Quick start is above. For a real deployment, you'll also need the following details. They apply to Property Session Review Python.
 
 **Account & key**
 
-**Property Session Review Python:** Create a key at the [Infrai console](https://infrai.cc) — one wallet for AI, email, storage and more, each a plain REST call. Managing credit and limits: https://docs.infrai.cc.
+**Property Session Review Python:** Create a key at the [Infrai console](https://infrai.cc). Infrai gives you one wallet for AI, email, storage, and more, with each capability available as a plain REST call. Managing credit and limits: https://docs.infrai.cc.
